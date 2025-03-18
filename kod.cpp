@@ -1,177 +1,160 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <set>
-#include <iterator>
+#include <iostream>   // Введення та виведення
+#include <fstream>    // Робота з файлами
+#include <vector>     // Вектор
+#include <algorithm>  // Алгоритми (reverse, sort)
+#include <set>        // Множини
+#include <limits>     // Обробка помилок вводу
 
 using namespace std;
 
-// Завдання 1: Зчитування масиву з файлу і перестановка частини масиву в зворотному порядку
-// Функція для зчитування масиву з файлу
-void get_mas(const string &filename, vector<float> &mas) {
-    ifstream inputFile(filename);  // Відкриваємо файл для читання
+// ========================== Завдання 1: Обробка масиву ==========================
+void executeTask1() {
     int n;
-    inputFile >> n;  // Зчитуємо розмір масиву
-    mas.resize(n);  // Задаємо розмір масиву
+    cout << "Завдання 1: Перестановка частини масиву.\n";
+    cout << "Введіть кількість елементів масиву: ";
+    cin >> n;
+
+    vector<float> mas(n);
+    cout << "Введіть елементи масиву: ";
     for (int i = 0; i < n; i++) {
-        inputFile >> mas[i];  // Зчитуємо елементи масиву з файлу
+        cin >> mas[i];
     }
-    inputFile.close();  // Закриваємо файл після зчитування
+
+    int K, L;
+    cout << "Введіть K та L для перестановки (1 ≤ K < L ≤ " << n << "): ";
+    cin >> K >> L;
+    reverse(mas.begin() + K - 1, mas.begin() + L); // Переставляємо 2-4 елементи в зворотному порядку
+
+    // Запис результату в файл
+    ofstream outputFile("array_out_n.txt");
+    for (float value : mas) outputFile << value << " ";
+    outputFile << endl;
+    outputFile.close();
+    cout << "Завдання 1 виконано! Результат записано в файл array_out_n.txt.\n";
 }
 
-// Функція для виведення масиву в файл
-void show_mas(const string &filename, const vector<float> &mas) {
-    ofstream outputFile(filename);  // Відкриваємо файл для запису
-    for (float value : mas) {
-        outputFile << value << " ";  // Записуємо кожен елемент масиву в файл
-    }
-    outputFile << endl;  // Перехід на новий рядок
-    outputFile.close();  // Закриваємо файл після запису
-}
+// ========================== Завдання 2: Аналіз матриці ==========================
+void executeTask2() {
+    int M, N;
+    cout << "Завдання 2: Пошук схожих стовпців у матриці.\n";
+    cout << "Введіть кількість рядків та стовпців матриці: ";
+    cin >> M >> N;
 
-// Функція для перестановки частини масиву в зворотному порядку
-void reverseArraySection(vector<float> &mas, int K, int L) {
-    // Використовуємо стандартну функцію reverse для перестановки частини масиву
-    reverse(mas.begin() + K - 1, mas.begin() + L);  // K і L зменшені на 1 через 0-індексацію
-}
-
-// Завдання 2: Пошук схожих стовпців у матриці
-// Функція для зчитування матриці з файлу
-void get_matrix(const string &filename, vector<vector<int>> &matrix, int &M, int &N) {
-    ifstream inputFile(filename);  // Відкриваємо файл для читання
-    inputFile >> M >> N;  // Зчитуємо кількість рядків і стовпців
-    matrix.resize(M, vector<int>(N));  // Створюємо матрицю потрібного розміру
+    vector<vector<int>> matrix(M, vector<int>(N));
+    cout << "Введіть елементи матриці:" << endl;
     for (int i = 0; i < M; i++) {
         for (int j = 0; j < N; j++) {
-            inputFile >> matrix[i][j];  // Зчитуємо елементи матриці з файлу
+            cin >> matrix[i][j];
         }
     }
-    inputFile.close();  // Закриваємо файл після зчитування
-}
 
-// Функція для перевірки схожості двох стовпців
-bool areColumnsSimilar(const vector<vector<int>> &matrix, int col1, int col2, int M) {
-    set<int> set1, set2;  // Використовуємо множини для зберігання унікальних значень стовпців
-    for (int i = 0; i < M; i++) {
-        set1.insert(matrix[i][col1]);  // Додаємо значення з першого стовпця в множину
-        set2.insert(matrix[i][col2]);  // Додаємо значення з другого стовпця в множину
-    }
-    return set1 == set2;  // Порівнюємо множини для визначення схожості
-}
-
-// Функція для підрахунку схожих стовпців
-int countSimilarColumns(const vector<vector<int>> &matrix, int M, int N) {
-    int similarCount = 0;  // Лічильник схожих стовпців
+    int count = 0;
     for (int j = 0; j < N - 1; j++) {
-        if (areColumnsSimilar(matrix, j, N - 1, M)) {  // Перевіряємо кожен стовпець на схожість з останнім
-            similarCount++;  // Якщо схожі, збільшуємо лічильник
-        }
-    }
-    return similarCount;  // Повертаємо кількість схожих стовпців
-}
-
-// Завдання 3: Шейкерне сортування для масиву символів
-// Функція для виконання шейкерного сортування (з двох напрямків)
-void CocktailShakerSort(vector<char> &arr) {
-    int n = arr.size();
-    for (int p = 1; p <= n / 2; p++) {  // Проходимо по масиву з двох напрямків
-        for (int i = p - 1; i < n - p; i++) {  // Прохід зліва направо (бульбашковий)
-            if (arr[i] < arr[i + 1]) {  // Якщо елемент менший за наступний
-                swap(arr[i], arr[i + 1]);  // Міняємо їх місцями
+        for (int k = j + 1; k < N; k++) {
+            multiset<int> set1, set2;
+            for (int i = 0; i < M; i++) {
+                set1.insert(matrix[i][j]);
+                set2.insert(matrix[i][k]);
             }
-        }
-        for (int i = n - p - 1; i >= p; i--) {  // Прохід справа наліво (зворотний)
-            if (arr[i] < arr[i - 1]) {  // Якщо елемент менший за попередній
-                swap(arr[i], arr[i - 1]);  // Міняємо їх місцями
-            }
+            if (set1 == set2) count++;
         }
     }
+
+    // Запис результату в файл
+    ofstream outputFile("matr_out_n.txt");
+    outputFile << "Кількість схожих стовпців: " << count << endl;
+    outputFile.close();
+    cout << "Завдання 2 виконано! Результат записано в файл matr_out_n.txt.\n";
 }
 
-// Функція для виведення відсортованого масиву символів
-void show_array(const vector<char> &arr) {
-    for (char ch : arr) {
-        cout << ch << " ";  // Виводимо кожен елемент масиву
+// ========================== Завдання 3: Сортування символів ==========================
+void executeTask3() {
+    int n;
+    cout << "Завдання 3: Сортування символів.\n";
+    cout << "Введіть кількість символів для сортування: ";
+    cin >> n;
+
+    vector<char> charArray(n);
+    cout << "Введіть символи для сортування: ";
+    for (int i = 0; i < n; i++) {
+        cin >> charArray[i];
     }
-    cout << endl;  // Перехід на новий рядок
+
+    sort(charArray.begin(), charArray.end());
+
+    // Запис результату в файл
+    ofstream outputFile("char_out_n.txt");
+    for (char ch : charArray) outputFile << ch << " ";
+    outputFile << endl;
+    outputFile.close();
+    cout << "Завдання 3 виконано! Результат записано в файл char_out_n.txt.\n";
 }
 
-// Завдання 4: Створення меню для вибору завдання
-// Функція для виведення меню
+// ========================== Завдання 4: Обернення тексту ==========================
+void executeTask4() {
+    cin.ignore();  // Очистка буфера після попереднього вводу
+    string text;
+    cout << "Завдання 4: Обернення тексту.\n";
+    cout << "Введіть текст для обертання: ";
+    getline(cin, text);  // Отримуємо весь текст
+
+    reverse(text.begin(), text.end());
+
+    // Запис результату в файл
+    ofstream outputFile("text_out_n.txt");
+    outputFile << text << endl;
+    outputFile.close();
+    cout << "Завдання 4 виконано! Результат записано в файл text_out_n.txt.\n";
+}
+
+// ========================== Головне меню програми ==========================
 void showMenu() {
-    cout << "Меню:" << endl;
-    cout << "1. Завдання 1: Перестановка частини масиву" << endl;
-    cout << "2. Завдання 2: Пошук схожих стовпців" << endl;
-    cout << "3. Завдання 3: Шейкерне сортування символів" << endl;
-    cout << "4. Вихід" << endl;
-    cout << "Оберіть завдання (1-4): ";
+    cout << "\n===== МЕНЮ =====\n";
+    cout << "1. Завдання 1: Перестановка частини масиву\n";
+    cout << "2. Завдання 2: Пошук схожих стовпців у матриці\n";
+    cout << "3. Завдання 3: Сортування символів\n";
+    cout << "4. Завдання 4: Обернення тексту\n";
+    cout << "5. Вихід\n";
+    cout << "Оберіть завдання (1-5): ";
 }
 
-// Головна функція для виконання програми
 int main() {
     int choice;
-    bool exit = false;  // Флаг для виходу з програми
+    while (true) {
+        showMenu(); // Виводимо меню
+        cin >> choice;
 
-    while (!exit) {
-        showMenu();  // Виводимо меню
-        cin >> choice;  // Вводимо вибір користувача
+        // Перевірка на некоректний ввід (наприклад, якщо ввели букву)
+        if (cin.fail()) {
+            cin.clear();  // Очищення помилки вводу
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Видаляємо зайві символи
+            cout << "Помилка! Введіть число від 1 до 5.\n";
+            continue;
+        }
 
+        // Виконання вибраного завдання
         switch (choice) {
-            case 1: {
-                // Завдання 1: Перестановка частини масиву
-                cout << "Введіть ім'я файлу для масиву: ";
-                string filename;
-                cin >> filename;
-                vector<float> mas;
-                get_mas(filename, mas);  // Зчитуємо масив з файлу
-
-                int K, L;
-                cout << "Введіть K та L для перестановки (1 ≤ K < L ≤ N): ";
-                cin >> K >> L;
-                reverseArraySection(mas, K, L);  // Перестановка частини масиву в зворотному порядку
-
-                show_mas("array_out_n.txt", mas);  // Записуємо результат в файл
+            case 1:
+                executeTask1();
                 break;
-            }
-            case 2: {
-                // Завдання 2: Пошук схожих стовпців у матриці
-                cout << "Введіть ім'я файлу для матриці: ";
-                string filename;
-                cin >> filename;
-                vector<vector<int>> matrix;
-                int M, N;
-                get_matrix(filename, matrix, M, N);  // Зчитуємо матрицю з файлу
-
-                int similarCount = countSimilarColumns(matrix, M, N);  // Підраховуємо схожі стовпці
-                ofstream outputFile("matr_out_n.txt");
-                outputFile << "Кількість схожих стовпців: " << similarCount << endl;  // Записуємо результат
+            case 2:
+                executeTask2();
                 break;
-            }
-            case 3: {
-                // Завдання 3: Шейкерне сортування
-                cout << "Введіть масив символів для сортування (7 елементів): ";
-                vector<char> charArray(7);
-                for (int i = 0; i < 7; i++) {
-                    cin >> charArray[i];  // Вводимо масив символів для сортування
-                }
-                CocktailShakerSort(charArray);  // Виконуємо шейкерне сортування
-
-                cout << "Відсортований масив: ";
-                show_array(charArray);  // Виводимо відсортований масив символів
+            case 3:
+                executeTask3();
                 break;
-            }
-            case 4: {
-                // Вихід з програми
-                cout << "Вихід з програми..." << endl;
-                exit = true;  // Змінюємо флаг, щоб вийти з циклу
+            case 4:
+                executeTask4();
                 break;
-            }
+            case 5:
+                cout << "Вихід з програми...\n";
+                return 0;
             default:
-                cout << "Невірний вибір! Спробуйте ще раз." << endl;
+                cout << "Невірний вибір! Введіть число від 1 до 5.\n";
                 break;
         }
-    }
 
-    return 0;  // Завершення програми
+        // Очищення залишкових символів після вводу
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
 }
